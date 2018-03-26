@@ -1,13 +1,17 @@
 var fetch = require('node-fetch')
 var EventEmitter = require('./EventEmitter')
 const VERSION = '0.0.1'
+require('dotenv').config()
 
 function initialize() {
   var readyEvent = 'ready'
   var changeEvent = 'change'
   var emitter
-  var state = {}
+  var state = { features: [] }
   var pollerRunning = false
+  var api = `http://${process.env.REACT_APP_UNLEASH_PROXY_HOST}:${
+    process.env.REACT_APP_UNLEASH_PROXY_PORT
+  }/api`
 
   emitter = EventEmitter()
 
@@ -31,31 +35,68 @@ function initialize() {
 
   function startPoller() {
     setInterval(() => {
-      if (state !== {}) {
-        setState({
-          flag: state.flag,
-          userId: state.userId,
-          enabled: isEnabled(state.flag, state.userId)
+      state.features.map(feature => {
+        let enabled = isEnabled(feature.flag, feature.userId)
+        Promise.all([feature.enabled, enabled]).then(values => {
+          if (values[0] !== values[1]) {
+            emitter.emit(changeEvent, feature)
+          }
         })
-      }
+        feature.enabled = enabled
+        return null
+      })
     }, 5000)
   }
 
   function isEnabled(flag, userId) {
-    let enabled = fetch(
-      'http://localhost:3004/api/flag/' + flag + '/userId/' + userId
-    )
+    let url = `${api}/flag/${flag}`
+    if (userId !== undefined) {
+      url = url + '/userId/' + userId
+    }
+    let enabled = fetch(url)
       .then(res => res.json())
       .then(json => {
         return json
       })
       .catch(err => {
-        console.log('fetch error', err)
+        console.log('ERROR:FETCH', err)
         return undefined
       })
     return enabled
   }
 
+  // queue up the feature if necessary, else return its state
+  function variation(flag, userId) {
+    const feature = featureLookup(flag, userId)
+    if (typeof feature !== 'undefined') {
+      const enabled = feature.enabled
+      //console.log('variation exists', flag, userId, enabled)
+      return enabled
+    } else {
+      // queue up this variation
+      const enabled = isEnabled(flag, userId)
+      enqueueFeature(flag, userId, enabled)
+      //console.log('variation new', flag, userId, enabled)
+      return enabled
+    }
+  }
+
+  function featureLookup(flag, userId) {
+    let feature = state.features.filter(
+      f => f.flag === flag && f.userId === userId
+    )
+    return feature[0]
+  }
+
+  function enqueueFeature(flag, userId, enabled) {
+    state.features.push({
+      flag: flag,
+      userId: userId,
+      enabled: enabled
+    })
+  }
+
+  /*
   function variation(flag, userId) {
     var enabled = isEnabled(flag, userId)
     setState({
@@ -80,6 +121,7 @@ function initialize() {
       emitter.emit(changeEvent, 'flag')
     }
   }
+*/
 
   var readyPromise = new Promise(function(resolve) {
     var onReady = emitter.on(readyEvent, function() {
