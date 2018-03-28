@@ -79,6 +79,60 @@ class App extends Component {
       : undefined
   }
 
+  appStyle() {
+    return this.getFeature('test3.colorScheme')
+      ? {
+          textAlign: 'center',
+          backgroundColor: 'lightblue'
+        }
+      : { textAlign: 'left' }
+  }
+
+  appSorterStyle(isBold) {
+    const weight = isBold ? 'bold' : 'normal'
+    return this.getFeature('test3.colorScheme')
+      ? {
+          textAlign: 'center',
+          backgroundColor: 'lightgrey',
+          fontWeight: weight
+        }
+      : {
+          textAlign: 'left',
+          fontWeight: weight
+        }
+  }
+
+  appTableStyle() {
+    return this.getFeature('test3.colorScheme')
+      ? {
+          margin: '0 auto',
+          backgroundColor: 'lightgreen'
+        }
+      : {}
+  }
+
+  powerUser() {
+    return this.getFeature('test3.powerUser') ? (
+      <div style={this.powerUserStyle()}>
+        <div style={{ fontSize: '40px' }}>You have the power!!!</div>
+        <button>PowerUp</button>
+        <button>Arm Torpedoes</button>
+        <button>Launch</button>
+      </div>
+    ) : (
+      ''
+    )
+  }
+
+  powerUserStyle() {
+    return this.getFeature('test3.colorScheme')
+      ? {
+          textAlign: 'center',
+          backgroundColor: 'red'
+        }
+      : { textAlign: 'left' }
+  }
+
   render() {
     // if (!this.state.featureFlags) {
     //   return <div className="App">Loading....</div>
@@ -101,20 +155,20 @@ class App extends Component {
 
     return (
       <div className="App">
-        <div style={{ textAlign: 'left' }}>
+        <div style={this.appStyle()}>
           <div
-            style={{ fontWeight: sorter === undefined ? 'bold' : 'normal' }}
+            style={this.appSorterStyle(sorter === undefined)}
             onClick={() => this.setState({ selectedSortOrder: 'natural' })}
           >
             Natural sorting
           </div>
           <div
-            style={{ fontWeight: sorter === isNewer ? 'bold' : 'normal' }}
+            style={this.appSorterStyle(sorter !== undefined)}
             onClick={() => this.setState({ selectedSortOrder: 'added' })}
           >
             Time sorting
           </div>
-          <table>
+          <table style={this.appTableStyle()}>
             <tbody>
               {this.state.songs
                 .slice()
@@ -128,6 +182,7 @@ class App extends Component {
             </tbody>
           </table>
         </div>
+        <div>{this.powerUser()}</div>
       </div>
     )
   }
