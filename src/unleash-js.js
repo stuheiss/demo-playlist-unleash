@@ -1,3 +1,4 @@
+/* lightweight interface to an unleash server via a local proxy */
 var fetch = require('node-fetch')
 var EventEmitter = require('./EventEmitter')
 const VERSION = '0.0.1'
@@ -16,12 +17,8 @@ function initialize() {
   emitter = EventEmitter()
 
   function on(event, handler, context) {
+    console.log(new Date().toLocaleString(), 'on.' + event)
     if (event.substr(0, changeEvent.length) === changeEvent) {
-      /*
-      if (!stream.isConnected()) {
-        connectStream()
-      }
-      */
       emitter.on.apply(emitter, [event, handler, context])
     } else {
       emitter.on.apply(emitter, Array.prototype.slice.call(arguments))
@@ -39,7 +36,8 @@ function initialize() {
         let enabled = isEnabled(feature.flag, feature.userId)
         Promise.all([feature.enabled, enabled]).then(values => {
           if (values[0] !== values[1]) {
-            emitter.emit(changeEvent, feature)
+            console.log(new Date().toLocaleString(), 'resolved', feature)
+            emitter.emit(changeEvent, 'enabled')
           }
         })
         feature.enabled = enabled
@@ -95,33 +93,6 @@ function initialize() {
       enabled: enabled
     })
   }
-
-  /*
-  function variation(flag, userId) {
-    var enabled = isEnabled(flag, userId)
-    setState({
-      flag: flag,
-      userId: userId,
-      enabled: enabled
-    })
-    return enabled
-  }
-
-  function setState(newState) {
-    Promise.all([state.enabled, newState.enabled]).then(values => {
-      if (values[0] !== values[1]) {
-        console.log('state enabled changed', values[0], values[1])
-        state = newState
-        emitter.emit(changeEvent, 'enabled')
-      }
-    })
-    if (state.flag !== newState.flag || state.userId !== newState.userId) {
-      console.log('state flag changed', state, newState)
-      state = newState
-      emitter.emit(changeEvent, 'flag')
-    }
-  }
-*/
 
   var readyPromise = new Promise(function(resolve) {
     var onReady = emitter.on(readyEvent, function() {

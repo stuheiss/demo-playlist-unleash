@@ -25,7 +25,8 @@ class App extends Component {
         { name: 'Strongest', added: '2017-11-30' },
         { name: 'Dreamer', added: '2017-12-02' },
         { name: 'River', added: '2017-12-03' }
-      ]
+      ],
+      health: 0
     }
   }
 
@@ -36,16 +37,17 @@ class App extends Component {
   }
 
   onUnleashReady(event) {
-    //console.log('onUnleashReady', event)
+    console.log('onUnleashReady', event)
     this.unleashUpdate(event)
   }
 
   onUnleashChange(event) {
-    //console.log('unUnleashChange event', event)
+    console.log('unUnleashChange event', event)
     this.unleashUpdate(event)
   }
 
   unleashUpdate(event) {
+    console.log('upleashUpdate', event)
     let pending = []
     const features = this.state.features.slice()
     features.map(feature => {
@@ -115,13 +117,27 @@ class App extends Component {
     return this.getFeature('test3.powerUser') ? (
       <div style={this.powerUserStyle()}>
         <div style={{ fontSize: '40px' }}>You have the power!!!</div>
-        <button>PowerUp</button>
-        <button>Arm Torpedoes</button>
-        <button>Launch</button>
+        <button onClick={() => this.powerUp()}>PowerUp</button>
+        <button onClick={() => this.armTorpedoes()}>Arm Torpedoes</button>
+        <button onClick={() => this.areYouSure()}>Launch</button>
+        <div>Health: {this.state.health}</div>
       </div>
     ) : (
       ''
     )
+  }
+
+  armTorpedoes() {
+    alert('Locked and loaded')
+  }
+
+  areYouSure() {
+    alert('Are you sure?')
+  }
+
+  powerUp() {
+    let newHealth = this.state.health + 100
+    this.setState({ health: newHealth })
   }
 
   powerUserStyle() {
