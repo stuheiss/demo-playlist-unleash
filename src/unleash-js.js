@@ -37,7 +37,7 @@ function initialize() {
         Promise.all([feature.enabled, enabled]).then(values => {
           if (values[0] !== values[1]) {
             console.log(new Date().toLocaleString(), 'resolved', feature)
-            emitter.emit(changeEvent, 'enabled')
+            emitter.emit(changeEvent, feature)
           }
         })
         feature.enabled = enabled

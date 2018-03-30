@@ -37,17 +37,17 @@ class App extends Component {
   }
 
   onUnleashReady(event) {
-    console.log('onUnleashReady', event)
+    console.log('onUnleashReady: event:', event)
     this.unleashUpdate(event)
   }
 
   onUnleashChange(event) {
-    console.log('unUnleashChange event', event)
+    console.log('unUnleashChange: event: ', event)
     this.unleashUpdate(event)
   }
 
   unleashUpdate(event) {
-    console.log('upleashUpdate', event)
+    console.log('upleashUpdate: event:', event)
     let pending = []
     const features = this.state.features.slice()
     features.map(feature => {
